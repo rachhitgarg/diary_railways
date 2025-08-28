@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Student Diary</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 AI Student Diary</h1>
+            <p>Your intelligent companion for academic and personal growth</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Write Entry Section -->
+            <div class="section write-section">
+                <h2>📝 Write Your Diary Entry</h2>
+                <form id="diary-form">
+                    <textarea 
+                        id="diary-content" 
+                        placeholder="How was your day? Share your thoughts, feelings, academic experiences..."
+                        rows="6"
+                    ></textarea>
+
+                    <div class="mood-section">
+                        <label for="mood-slider">How are you feeling? (1 = Very sad, 5 = Very happy)</label>
+                        <input 
+                            type="range" 
+                            id="mood-slider" 
+                            min="1" 
+                            max="5" 
+                            value="3"
+                            oninput="updateMoodLabel(this.value)"
+                        >
+                        <span id="mood-label">Neutral (3)</span>
+                    </div>
+
+                    <button type="submit" id="submit-btn">
+                        💾 Save Entry & Get AI Insights
+                    </button>
+                </form>
+
+                <div id="submission-status" class="status-message"></div>
+            </div>
+
+            <!-- Daily Reflection Section -->
+            <div class="section reflection-section">
+                <h2>🌅 Today's Reflection</h2>
+                <div id="daily-reflection" class="reflection-content">
+                    <p>Your daily AI reflection will appear here...</p>
+                </div>
+                <button onclick="loadReflection()" id="reflection-btn">
+                    🔄 Get New Reflection
+                </button>
+            </div>
+
+            <!-- Analytics Section -->
+            <div class="section analytics-section">
+                <h2>📊 Your Progress</h2>
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <h3 id="total-entries">0</h3>
+                        <p>Total Entries</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="avg-mood">-</h3>
+                        <p>Average Mood</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="streak-days">0</h3>
+                        <p>Day Streak</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Entries -->
+            <div class="section entries-section">
+                <h2>📚 Recent Insights</h2>
+                <div id="recent-entries">
+                    <div class="insight-card">
+                        <h3>🎯 Getting Started</h3>
+                        <p>Welcome to your AI-powered diary! Start by writing your first entry above. The AI will analyze your thoughts and provide personalized insights to help you grow.</p>
+                    </div>
+                    <div class="insight-card">
+                        <h3>🧠 AI Analysis</h3>
+                        <p>Your diary entries will be analyzed for emotions, topics, and patterns. This helps identify stress, track mood, and provide better support.</p>
+                    </div>
+                    <div class="insight-card">
+                        <h3>🌟 Personal Growth</h3>
+                        <p>Over time, you'll see patterns in your behavior, academic performance, and emotional wellbeing. Use these insights to make positive changes!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>🔒 Your privacy is protected. All data is encrypted and secure.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
