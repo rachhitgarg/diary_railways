@@ -1,98 +1,103 @@
-"""
-AI Student Diary - Railway Deployment
-Production-ready FastAPI application
-"""
-
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, JSONResponse
 import os
 import logging
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from contextlib import asynccontextmanager
 
-# Configure logging
+# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Application lifespan events"""
-    logger.info("🚀 AI Student Diary starting up...")
-
-    # Initialize databases and connections
-    await initialize_services()
-
-    yield
-
-    logger.info("📴 AI Student Diary shutting down...")
-
-# Create FastAPI app
 app = FastAPI(
     title="AI Student Diary",
-    description="AI-powered diary application for Indian students",
-    version="1.0.0",
-    lifespan=lifespan
+    description="AI-powered diary for students",
+    version="1.0.0"
 )
 
-# CORS middleware for frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Configure for production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Mount static files
+try:
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    logger.info("Static files mounted successfully")
+except Exception as e:
+    logger.warning(f"Could not mount static files: {e}")
 
-# Mount static files (frontend)
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/", StaticFiles(directory="static", html=True), name="frontend")
+@app.get("/")
+async def root():
+    """Serve the main web interface"""
+    try:
+        with open("static/index.html", "r") as f:
+            content = f.read()
+        return HTMLResponse(content=content)
+    except Exception as e:
+        logger.error(f"Error loading index.html: {e}")
+        return HTMLResponse("""
+        <html>
+            <head><title>AI Student Diary</title></head>
+            <body>
+                <h1>🎓 AI Student Diary</h1>
+                <p>Application is starting up...</p>
+                <p>Static files loading issue - but the app is working!</p>
+            </body>
+        </html>
+        """)
 
-# Health check endpoint
 @app.get("/health")
 async def health_check():
+    """Health check endpoint"""
+    logger.info("Health check requested")
     return {
         "status": "healthy",
         "service": "AI Student Diary",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "environment": os.environ.get("ENVIRONMENT", "development")
     }
 
-async def initialize_services():
-    """Initialize external services"""
-    try:
-        # Test OpenAI connection
-        openai_key = os.getenv("OPENAI_API_KEY")
-        if not openai_key:
-            logger.warning("⚠️ OpenAI API key not configured")
-        else:
-            logger.info("✅ OpenAI API key configured")
+@app.post("/api/v1/diary/entries")
+async def create_entry(entry_data: dict):
+    """Simplified diary entry endpoint"""
+    logger.info(f"Diary entry received: {entry_data.get('content', 'No content')[:50]}...")
 
-        # Test Pinecone connection
-        pinecone_key = os.getenv("PINECONE_API_KEY")
-        if not pinecone_key:
-            logger.warning("⚠️ Pinecone API key not configured")
-        else:
-            logger.info("✅ Pinecone API key configured")
+    # Simulate processing
+    return {
+        "status": "success",
+        "message": "Entry received! AI processing will be implemented next.",
+        "entry_id": "temp_123",
+        "analysis": {
+            "sentiment": "neutral",
+            "mood_detected": entry_data.get("mood_score", 0.5),
+            "message": "Basic processing complete - full AI analysis coming soon!"
+        }
+    }
 
-        # Test Neo4j connection
-        neo4j_uri = os.getenv("NEO4J_URI")
-        if not neo4j_uri:
-            logger.warning("⚠️ Neo4j URI not configured")
-        else:
-            logger.info("✅ Neo4j URI configured")
+@app.get("/api/v1/diary/reflection/daily")
+async def get_daily_reflection():
+    """Simple daily reflection"""
+    return {
+        "reflection": "🌅 Good morning! Your AI diary is up and running. Start writing to see amazing insights soon!",
+        "generated_at": "2025-08-29T00:00:00Z"
+    }
 
-        logger.info("✅ Service initialization complete")
+@app.get("/api/v1/analytics/overview")
+async def get_analytics():
+    """Basic analytics"""
+    return {
+        "total_entries": 0,
+        "mood_average": None,
+        "streak_days": 0,
+        "message": "Start writing entries to see your analytics!"
+    }
 
-    except Exception as e:
-        logger.error(f"❌ Service initialization failed: {e}")
-
-# API Routes
-from app.routers import auth, diary, analytics
-
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-app.include_router(diary.router, prefix="/api/v1/diary", tags=["Diary"])
-app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
+# Error handlers
+@app.exception_handler(Exception)
+async def general_exception_handler(request, exc):
+    logger.error(f"Unhandled error: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "message": str(exc)}
+    )
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+    port = int(os.environ.get("PORT", 8000))
+    logger.info(f"Starting server on port {port}")
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
