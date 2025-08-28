@@ -1,105 +1,465 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+    <title>AI Student Diary</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Student Diary</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        .mood-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .mood-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            margin: 15px 0;
+        }
+
+        .mood-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        .mood-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .response {
+            background: #e8f5e8;
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .response h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+
+        .analysis-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 3px solid #4CAF50;
+        }
+
+        .reflection-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef5350;
+        }
+
+        .alert-success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #4CAF50;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <header>
+        <div class="header">
             <h1>🎓 AI Student Diary</h1>
             <p>Your intelligent companion for academic and personal growth</p>
-        </header>
+        </div>
 
-        <div class="main-content">
-            <!-- Write Entry Section -->
-            <div class="section write-section">
+        <div class="content">
+            <div class="section">
                 <h2>📝 Write Your Diary Entry</h2>
-                <form id="diary-form">
-                    <textarea 
-                        id="diary-content" 
-                        placeholder="How was your day? Share your thoughts, feelings, academic experiences..."
-                        rows="6"
-                    ></textarea>
+                <textarea id="diaryText" placeholder="How was your day? Share your thoughts, feelings, academic experiences, challenges, or anything on your mind..."></textarea>
 
-                    <div class="mood-section">
-                        <label for="mood-slider">How are you feeling? (1 = Very sad, 5 = Very happy)</label>
-                        <input 
-                            type="range" 
-                            id="mood-slider" 
-                            min="1" 
-                            max="5" 
-                            value="3"
-                            oninput="updateMoodLabel(this.value)"
-                        >
-                        <span id="mood-label">Neutral (3)</span>
-                    </div>
+                <div class="mood-container">
+                    <label>How are you feeling? (1 = Very sad, 5 = Very happy)</label>
+                    <input type="range" id="moodSlider" class="mood-slider" min="1" max="5" value="3">
+                    <div class="mood-value" id="moodValue">Neutral (3)</div>
+                </div>
 
-                    <button type="submit" id="submit-btn">
-                        💾 Save Entry & Get AI Insights
-                    </button>
-                </form>
+                <button class="btn" onclick="saveEntry()" id="saveBtn">
+                    💾 Save Entry & Get AI Insights
+                </button>
 
-                <div id="submission-status" class="status-message"></div>
+                <div id="response" class="response" style="display: none;">
+                    <h3>🌟 AI Analysis & Reflection</h3>
+                    <div id="analysisResult"></div>
+                </div>
             </div>
 
-            <!-- Daily Reflection Section -->
-            <div class="section reflection-section">
+            <div class="section">
                 <h2>🌅 Today's Reflection</h2>
-                <div id="daily-reflection" class="reflection-content">
-                    <p>Your daily AI reflection will appear here...</p>
-                </div>
-                <button onclick="loadReflection()" id="reflection-btn">
+                <div id="dailyReflection">Your daily AI reflection will appear here...</div>
+                <br>
+                <button class="btn btn-secondary" onclick="getNewReflection()">
                     🔄 Get New Reflection
                 </button>
             </div>
 
-            <!-- Analytics Section -->
-            <div class="section analytics-section">
+            <div class="section">
                 <h2>📊 Your Progress</h2>
-                <div class="analytics-grid">
+                <div class="progress-stats">
                     <div class="stat-card">
-                        <h3 id="total-entries">0</h3>
-                        <p>Total Entries</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="avg-mood">-</h3>
-                        <p>Average Mood</p>
+                        <div class="stat-number" id="entryCount">0</div>
+                        <div class="stat-label">Total Entries</div>
                     </div>
                     <div class="stat-card">
-                        <h3 id="streak-days">0</h3>
-                        <p>Day Streak</p>
+                        <div class="stat-number" id="streakCount">0</div>
+                        <div class="stat-label">Day Streak</div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Recent Entries -->
-            <div class="section entries-section">
-                <h2>📚 Recent Insights</h2>
-                <div id="recent-entries">
-                    <div class="insight-card">
-                        <h3>🎯 Getting Started</h3>
-                        <p>Welcome to your AI-powered diary! Start by writing your first entry above. The AI will analyze your thoughts and provide personalized insights to help you grow.</p>
-                    </div>
-                    <div class="insight-card">
-                        <h3>🧠 AI Analysis</h3>
-                        <p>Your diary entries will be analyzed for emotions, topics, and patterns. This helps identify stress, track mood, and provide better support.</p>
-                    </div>
-                    <div class="insight-card">
-                        <h3>🌟 Personal Growth</h3>
-                        <p>Over time, you'll see patterns in your behavior, academic performance, and emotional wellbeing. Use these insights to make positive changes!</p>
+                    <div class="stat-card">
+                        <div class="stat-number" id="moodAvg">-</div>
+                        <div class="stat-label">Avg Mood</div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <footer>
-            <p>🔒 Your privacy is protected. All data is encrypted and secure.</p>
-        </footer>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        const moodSlider = document.getElementById('moodSlider');
+        const moodValue = document.getElementById('moodValue');
+
+        // Mood slider functionality
+        moodSlider.oninput = function() {
+            const moods = [
+                'Very Sad (1)', 
+                'Sad (2)', 
+                'Neutral (3)', 
+                'Happy (4)', 
+                'Very Happy (5)'
+            ];
+            moodValue.textContent = moods[this.value - 1];
+
+            // Change color based on mood
+            const colors = ['#f44336', '#ff9800', '#9e9e9e', '#4CAF50', '#8bc34a'];
+            moodValue.style.color = colors[this.value - 1];
+        };
+
+        // Save diary entry
+        async function saveEntry() {
+            const content = document.getElementById('diaryText').value;
+            const mood = document.getElementById('moodSlider').value;
+            const saveBtn = document.getElementById('saveBtn');
+
+            if (!content.trim()) {
+                showAlert('Please write something in your diary first!', 'error');
+                return;
+            }
+
+            // Show loading state
+            saveBtn.innerHTML = '<div class="loading"></div> Processing...';
+            saveBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/v1/diary/entries', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: content,
+                        mood_score: parseInt(mood)
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    displayAnalysis(result);
+                    document.getElementById('diaryText').value = '';
+                    updateProgress();
+                    showAlert('Entry saved successfully!', 'success');
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to save entry');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error saving entry: ' + error.message, 'error');
+            } finally {
+                // Reset button
+                saveBtn.innerHTML = '💾 Save Entry & Get AI Insights';
+                saveBtn.disabled = false;
+            }
+        }
+
+        // Display AI analysis results
+        function displayAnalysis(result) {
+            const responseDiv = document.getElementById('response');
+            const analysisDiv = document.getElementById('analysisResult');
+
+            let html = '<div class="analysis-item">';
+            html += '<h4>✅ Entry Saved Successfully!</h4>';
+            html += `<p><strong>Sentiment:</strong> ${capitalizeFirst(result.analysis.sentiment || 'neutral')}</p>`;
+
+            if (result.analysis.emotions && result.analysis.emotions.length > 0) {
+                html += `<p><strong>Emotions detected:</strong> ${result.analysis.emotions.join(', ')}</p>`;
+            }
+
+            if (result.analysis.topics && result.analysis.topics.length > 0) {
+                html += `<p><strong>Topics:</strong> ${result.analysis.topics.join(', ')}</p>`;
+            }
+
+            if (result.analysis.key_insights && result.analysis.key_insights.length > 0) {
+                html += `<p><strong>Key insights:</strong></p><ul>`;
+                result.analysis.key_insights.forEach(insight => {
+                    html += `<li>${insight}</li>`;
+                });
+                html += '</ul>';
+            }
+
+            html += '</div>';
+
+            if (result.reflection) {
+                html += '<div class="reflection-box">';
+                html += '<h4>💭 Your Personal Reflection:</h4>';
+                html += `<div>${result.reflection.replace(/\n/g, '<br>')}</div>`;
+                html += '</div>';
+            }
+
+            analysisDiv.innerHTML = html;
+            responseDiv.style.display = 'block';
+
+            // Scroll to results
+            responseDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Get new daily reflection
+        async function getNewReflection() {
+            try {
+                const response = await fetch('/api/v1/diary/reflection/daily');
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('dailyReflection').innerHTML = 
+                        result.reflection.replace(/\n/g, '<br>');
+                } else {
+                    throw new Error('Failed to get reflection');
+                }
+            } catch (error) {
+                console.error('Error getting reflection:', error);
+                document.getElementById('dailyReflection').innerHTML = 
+                    '🌟 Welcome to your AI Student Diary! Start writing to get personalized reflections.';
+            }
+        }
+
+        // Update progress statistics
+        async function updateProgress() {
+            try {
+                const response = await fetch('/api/v1/analytics/overview');
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('entryCount').textContent = stats.total_entries || 0;
+                    document.getElementById('streakCount').textContent = stats.streak_days || 0;
+                    document.getElementById('moodAvg').textContent = 
+                        stats.mood_average ? stats.mood_average.toFixed(1) : '-';
+                }
+            } catch (error) {
+                console.error('Error updating progress:', error);
+            }
+        }
+
+        // Show alert messages
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+
+            // Insert at top of content
+            const content = document.querySelector('.content');
+            content.insertBefore(alertDiv, content.firstChild);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Utility function
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            getNewReflection();
+            updateProgress();
+        };
+    </script>
 </body>
 </html>
